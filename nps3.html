@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NPS Dashboard</title>
+  <!-- Add Bootstrap CSS link -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 20px;
+      background-color: #f8f9fa;
+    }
+    h2 {
+      color: #007bff;
+    }
+    select {
+      margin-bottom: 10px;
+    }
+    canvas {
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      background-color: #fff;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+    }
+    th {
+      background-color: #007bff;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2 class="mt-4 mb-4">NPS Dashboard</h2>
+
+    <div class="row mb-3">
+      <div class="col-md-4">
+        <label for="chartType">Choose a chart type:</label>
+        <select id="chartType" class="form-control">
+          <option value="bar">Bar Chart</option>
+          <option value="line">Line Chart</option>
+          <option value="pie">Pie Chart</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label for="dataDropdown">Choose data:</label>
+        <select id="dataDropdown" class="form-control">
+          <option value="subscribers">Subscribers</option>
+          <option value="amount">Amount</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        <canvas id="chartCanvas" width="600" height="300"></canvas>
+      </div>
+      <div class="col-md-6">
+        <h3>Data Table</h3>
+        <table id="dataTable" class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Subscribers</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Table data will be dynamically populated here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Bootstrap and Chart.js scripts -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <script>
+    // Sample data
+    const excelData = {
+      labels: ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+      subscribers: [6803, 6812, 6890, 6860, 6933, 8076],
+      amount: [80543778, 74235951, 43747350, 76409341, 77053410, 84751440]
+    };
+
+    const chartTypeDropdown = document.getElementById('chartType');
+    const dataDropdown = document.getElementById('dataDropdown');
+    const chartCanvas = document.getElementById('chartCanvas');
+    const ctx = chartCanvas.getContext('2d');
+    const dataTableBody = document.querySelector('#dataTable tbody');
+    let currentChart;
+
+    renderChart();
+    renderTable();
+
+    chartTypeDropdown.addEventListener('change', renderChart);
+    dataDropdown.addEventListener('change', renderChart);
+
+    function renderChart() {
+      const selectedChartType = chartTypeDropdown.value;
+      const selectedData = dataDropdown.value;
+
+      if (currentChart) {
+        currentChart.destroy();
+      }
+
+      currentChart = new Chart(ctx, {
+        type: selectedChartType,
+        data: {
+          labels: excelData.labels,
+          datasets: [{
+            label: selectedData,
+            data: excelData[selectedData],
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          },
+          plugins: {
+            legend: {
+              display: true,
+              position: 'bottom',
+            },
+            tooltip: {
+              enabled: true,
+              intersect: false,
+              mode: 'index',
+            },
+          },
+          responsive: true,
+          maintainAspectRatio: false,
+        }
+      });
+    }
+
+    function renderTable() {
+      dataTableBody.innerHTML = '';
+
+      for (let i = 0; i < excelData.labels.length; i++) {
+        const row = document.createElement('tr');
+        const monthCell = document.createElement('td');
+        const subscribersCell = document.createElement('td');
+        const amountCell = document.createElement('td');
+
+        monthCell.textContent = excelData.labels[i];
+        subscribersCell.textContent = excelData.subscribers[i];
+        amountCell.textContent = excelData.amount[i];
+
+        row.appendChild(monthCell);
+        row.appendChild(subscribersCell);
+        row.appendChild(amountCell);
+
+        dataTableBody.appendChild(row);
+      }
+    }
+  </script>
+
+</body>
+</html>
